@@ -7,13 +7,11 @@ import BorderEffect from './BorderEffect';
 import { useControls } from 'leva';
 
 type LottieMeshProps = {
-  file: File;
+  lottieObject: any;
 };
 
-export function LottieMesh({ file }: LottieMeshProps) {
+export function LottieMesh({ lottieObject }: LottieMeshProps) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const [lottieObject, setLottieObject] = useState<THREE.Object3D | null>(null);
-  const { size } = useThree();
   const { scale, speed, showBorder } = useControls({
     showBorder:{value:true},
     scale: {
@@ -29,28 +27,9 @@ export function LottieMesh({ file }: LottieMeshProps) {
       step: 0.1,
     },
   });
-  const aspect = useAspect(size.width, size.height, 1);
+  console.log(lottieObject,lottieObject,"check nage")
+  const aspect = useAspect(lottieObject.image.width, lottieObject.image.height,1);
 
-  useEffect(() => {
-    const loader = new LottieLoader();
-    const url = URL.createObjectURL(file);
-
-    loader.load(
-      url,
-      (obj) => {
-        setLottieObject(obj);
-        (obj as any)?.animation?.setSpeed?.(speed); // Optional chaining in case `animation` exists
-      },
-      undefined,
-      (err) => {
-        console.error('Lottie load error:', err);
-      }
-    );
-
-    return () => {
-      URL.revokeObjectURL(url); // Cleanup blob
-    };
-  }, [file]);
 
   useEffect(() => {
     if (lottieObject && (lottieObject as any)?.animation?.setSpeed) {
@@ -64,7 +43,7 @@ export function LottieMesh({ file }: LottieMeshProps) {
         <BorderEffect isActive={showBorder} key={scale+speed} meshRef={meshRef} >
 
     <mesh ref={meshRef} scale={[scale * aspect[0], scale * aspect[1], 1]}>
-      <planeGeometry args={[1, 1]} />
+      <planeGeometry args={[aspect[0],aspect[1]]} />
       <meshBasicMaterial transparent map={lottieObject} />
           </mesh >
                   </BorderEffect>
